@@ -1,0 +1,39 @@
+name: Conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  conformance:
+    name: Run conformance suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run conformance suite
+        run: node conformance/runner.mjs
+      - name: Validate schema
+        run: |
+          node -e "
+            const fs = require('fs');
+          const schema = JSON.parse(fs.readFileSync('schema/sigrank-operator-record-v0.1.schema.json', 'utf-8'));
+          const example = JSON.parse(fs.readFileSync('examples/canonical-reference.json', 'utf-8'));
+          // Basic structural validation
+          const required = schema.required || [];
+          for (const field of required) {
+            if (!(field in example)) {
+              console.error('Schema validation failed: missing ' + field);
+              process.exit(1);
+            }
+          }
+          if (example.spec !== 'sigrank/0.1-draft') {
+            console.error('Schema validation failed: spec must be sigrank/0.1-draft');
+            process.exit(1);
+          }
+          console.log('Schema validation passed');
+          "
