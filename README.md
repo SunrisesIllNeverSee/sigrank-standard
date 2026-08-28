@@ -1,8 +1,8 @@
 # SigRank Standard
 
-**Open measurement specification for AI operator performance.**
+**Open measurement specification for AI operator token-processing efficiency.**
 
-The SigRank Standard defines a common measurement vocabulary for human operation of generative AI systems across tools, providers, models, and workflows.
+The SigRank Standard defines a common measurement vocabulary for observable token-processing patterns in human operation of generative AI systems. It measures how efficiently an operator processes tokens — not cognition, work quality, employee productivity, or business outcomes.
 
 ## Current version
 
@@ -85,8 +85,19 @@ The normative documents in `docs/` were extracted from the `sigrank-app` reposit
 
 See `LICENSE` and `NOTICE` for details.
 
+## Governance status
+
+This repository is a **candidate authority**, not a designated authority. It was created under a now-superseded handoff and is awaiting owner designation per the Course of Ship Gate C process.
+
+- Technical verification: 12/12 conformance fixtures pass, Python reference reproduces canonical Yield 18436.98
+- Alignment: wording narrowed to token-processing/efficiency construct per Course of Ship invariants
+- Process: initial implementation was pushed directly to `main`; this alignment change is a reviewable PR
+- Designation: pending owner approval at Gate C
+
+No merge, publication, or deployment is authorized by this candidate's existence.
+
 ## Related
 
-- [SignalAF](https://signalaf.com) — public leaderboard and reference implementation
+- [SignalAF](https://signalaf.com) — public leaderboard, reference implementation, and human-readable Standard distribution URL
 - [sigrank-mcp](https://github.com/SunrisesIllNeverSee/sigrank-mcp) — CLI and MCP instrument
 - [@sigrank/cascade](https://github.com/SunrisesIllNeverSee/sigrank-cascade) — canonical math package
