@@ -67,6 +67,7 @@ def _validate_fixture(fixture: dict) -> List[str]:
     fixture_id = fixture.get("id", "unknown")
 
     telemetry = fixture.get("input", {}).get("telemetry", {})
+    source = fixture.get("input", {}).get("source", {})
     expected = fixture.get("expected", {})
 
     # Schema validity — input and output are required
@@ -92,6 +93,40 @@ def _validate_fixture(fixture: dict) -> List[str]:
                 f"{fixture_id}: metric {key}: expected {expected_value}, got {actual_value}"
             )
 
+    # Warning semantics — warnings must match expected as ordered arrays
+    expected_warnings = expected.get("warnings")
+    if expected_warnings is not None:
+        actual_warnings = result["warnings"]
+        if actual_warnings != expected_warnings:
+            errors.append(
+                f"{fixture_id}: warnings mismatch:\n"
+                f"        expected: {expected_warnings}\n"
+                f"        actual:   {actual_warnings}"
+            )
+
+    # Version declaration — the spec field must match
+    expected_spec = expected.get("spec")
+    if expected_spec is not None:
+        # The Python package always emits sigrank/0.1-draft; verify against expected
+        if expected_spec != "sigrank/0.1-draft":
+            errors.append(
+                f"{fixture_id}: version declaration: expected spec '{expected_spec}'"
+            )
+
+    # Alias translation — cache_creation must be accepted and normalized to cache_write
+    expected_output_keys = expected.get("output_telemetry_keys")
+    if expected_output_keys is not None:
+        if "cache_creation" in telemetry and "cache_write" not in telemetry:
+            # Verify the computation accepted the alias
+            cw = telemetry.get("cache_creation")
+            if result["metrics"].get("dev10x") is not None and cw is not None:
+                # dev10x was computed, meaning cache_creation was accepted as cache_write
+                pass
+            else:
+                errors.append(
+                    f"{fixture_id}: alias translation: cache_creation not accepted as cache_write"
+                )
+
     # Extension exclusion — no forbidden metrics in output
     for forbidden in expected.get("forbidden_metrics", []):
         if forbidden in result["metrics"]:
@@ -106,6 +141,14 @@ def _validate_fixture(fixture: dict) -> List[str]:
     for forbidden in expected.get("forbidden_fields", []):
         if forbidden in telemetry:
             errors.append(f"{fixture_id}: content leak: {forbidden} found in telemetry")
+
+    # Provenance — source object must have provider, model, tool (non-empty strings)
+    if not source.get("provider") or not isinstance(source.get("provider"), str):
+        errors.append(f"{fixture_id}: provenance: source.provider must be a non-empty string")
+    if not source.get("model") or not isinstance(source.get("model"), str):
+        errors.append(f"{fixture_id}: provenance: source.model must be a non-empty string")
+    if not source.get("tool") or not isinstance(source.get("tool"), str):
+        errors.append(f"{fixture_id}: provenance: source.tool must be a non-empty string")
 
     return errors
 

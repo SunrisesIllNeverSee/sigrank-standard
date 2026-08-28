@@ -23,7 +23,7 @@ result = compute_metrics(
     cache_read=2_555_179_769,
 )
 print(result["metrics"])
-# {'yield': 18436.98, 'leverage': 2042.2, 'velocity': 9.028, 'snr': 0.9, 'dev10x': 3.31}
+# {'yield': 18436.98, 'leverage': 2042.2, 'velocity': 9.028, 'snr': 0.9003, 'dev10x': 3.31}
 ```
 
 ### Build a full record

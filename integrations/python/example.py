@@ -68,7 +68,7 @@ def compute_metrics(
     # 10xDEV = log10(R / I) = log10(Leverage) — requires all four pillars > 0
     dev10x = None
     if cache_write is None or cache_read is None:
-        pass  # unavailable → null
+        # unavailable → null
         warnings.append("dev10x_undefined: requires all four pillars > 0")
     elif input_tokens > 0 and output_tokens > 0 and cache_write > 0 and cache_read > 0:
         dev10x = math.log10(cache_read / input_tokens)

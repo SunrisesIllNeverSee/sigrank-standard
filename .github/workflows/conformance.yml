@@ -17,6 +17,8 @@ jobs:
           node-version: 22
       - name: Run conformance suite
         run: node conformance/runner.mjs
+      - name: Run conformance self-test
+        run: node conformance/tests/runner-self-test.mjs
       - name: Validate canonical example against schema
         run: |
           node -e "
