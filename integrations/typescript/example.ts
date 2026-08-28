@@ -77,17 +77,20 @@ export function computeMetrics(t: Telemetry): { metrics: Metrics; warnings: stri
     warnings.push("yield_undefined: requires input>0");
   }
 
+  // Standard-level warnings for unavailable cache (emitted before dev10x
+  // warning so the "why" precedes the "what" in the warning list)
+  if (cacheWrite === null) warnings.push("cache_write is unavailable; 10xDEV is undefined.");
+  if (cacheRead === null) warnings.push("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.");
+
   let dev10x: number | null = null;
   if (cacheWrite === null || cacheRead === null) {
     // unavailable → null
+    warnings.push("dev10x_undefined: requires all four pillars > 0");
   } else if (input > 0 && output > 0 && cacheWrite > 0 && cacheRead > 0) {
-    dev10x = Math.log10((output / input) * (cacheWrite / output) * (cacheRead / cacheWrite));
+    dev10x = Math.log10(cacheRead / input);
   } else {
     warnings.push("dev10x_undefined: requires all four pillars > 0");
   }
-
-  if (cacheWrite === null) warnings.push("cache_write is unavailable; 10xDEV is undefined.");
-  if (cacheRead === null) warnings.push("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.");
 
   return {
     metrics: {

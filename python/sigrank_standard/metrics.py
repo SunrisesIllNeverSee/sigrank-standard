@@ -1,12 +1,7 @@
-#!/usr/bin/env python3
 """
-integrations/python/example.py
+Metric computation for SigRank Standard v0.1-draft.
 
-Minimal Python implementation of the SigRank Standard v0.1-draft
-five-metric portable core. No dependencies.
-
-A conforming implementation MUST produce the same results as the
-conformance suite fixtures for the same inputs.
+Implements the five portable metrics from four token pillars (I/O/W/R).
 """
 
 import math
@@ -15,6 +10,7 @@ from typing import Optional
 
 
 def _round(n: Optional[float], d: int) -> Optional[float]:
+    """Round to d decimal places, returning None for non-finite values."""
     if n is None or not math.isfinite(n):
         return None
     return round(n, d)
@@ -26,7 +22,20 @@ def compute_metrics(
     cache_write: Optional[int] = None,
     cache_read: Optional[int] = None,
 ) -> dict:
-    """Compute the five portable metrics from four token pillars."""
+    """
+    Compute the five portable metrics from four token pillars.
+
+    Args:
+        input_tokens:  Number of input (prompt) tokens.
+        output_tokens: Number of output (completion) tokens.
+        cache_write:   Number of cache-write (cache_creation) tokens, or None.
+        cache_read:    Number of cache-read tokens, or None.
+
+    Returns:
+        dict with 'metrics' and 'warnings' keys.
+        metrics: {yield, leverage, velocity, snr, dev10x} — each float or None.
+        warnings: list of str explaining any None values.
+    """
     warnings = []
 
     # SNR = output / (input + output)
@@ -43,16 +52,16 @@ def compute_metrics(
     # Leverage = cache_read / input
     leverage = None
     if cache_read is None:
-        pass  # unavailable → null
+        pass  # unavailable → None
     elif input_tokens > 0:
         leverage = cache_read / input_tokens
     else:
         warnings.append("leverage_undefined: input=0")
 
-    # Yield = leverage × velocity
+    # Yield = (cache_read * output) / input^2 = leverage * velocity
     y = None
     if cache_read is None:
-        pass  # unavailable → null
+        pass  # unavailable → None
     elif leverage is not None and velocity is not None:
         y = leverage * velocity
     else:
@@ -66,9 +75,10 @@ def compute_metrics(
         warnings.append("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.")
 
     # 10xDEV = log10(R / I) = log10(Leverage) — requires all four pillars > 0
+    # (per SPEC §7.5 reference implementation policy)
     dev10x = None
     if cache_write is None or cache_read is None:
-        # unavailable → null
+        # unavailable → None
         warnings.append("dev10x_undefined: requires all four pillars > 0")
     elif input_tokens > 0 and output_tokens > 0 and cache_write > 0 and cache_read > 0:
         dev10x = math.log10(cache_read / input_tokens)
@@ -96,7 +106,12 @@ def build_record(
     model: str = "unknown",
     tool: str = "unknown",
 ) -> dict:
-    """Build a complete SigRank Standard v0.1-draft record."""
+    """
+    Build a complete SigRank Standard v0.1-draft operator record.
+
+    Returns a dict conforming to the sigrank-operator-record-v0.1 schema:
+        spec, timestamp, source, telemetry, metrics, warnings.
+    """
     result = compute_metrics(input_tokens, output_tokens, cache_write, cache_read)
     return {
         "spec": "sigrank/0.1-draft",
@@ -111,18 +126,3 @@ def build_record(
         "metrics": result["metrics"],
         "warnings": result["warnings"],
     }
-
-
-if __name__ == "__main__":
-    # Canonical reference: MO§ES seed values
-    record = build_record(
-        input_tokens=1251211,
-        output_tokens=11296121,
-        cache_write=128196310,
-        cache_read=2555179769,
-        provider="anthropic",
-        model="claude-sonnet-4",
-        tool="claude-code",
-    )
-    import json
-    print(json.dumps(record, indent=2))
