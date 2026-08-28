@@ -76,6 +76,20 @@ jobs:
             }
             console.log('Canonical example schema validation passed');
           "
+      - name: Run Python conformance runner
+        run: |
+          # Install the local package in editable mode so the conformance runner
+          # can be invoked via `python -m sigrank_standard`. This catches
+          # regressions in the published Python conformance runner, not just the
+          # standalone example.
+          pip install -e python/ --quiet
+          python -m sigrank_standard
+      - name: Run Python conformance self-test
+        run: |
+          # Meta-test: verifies the Python runner catches non-conforming
+          # implementations (wrong metrics, missing required_fields, wrong
+          # version, alias leaks). Mirrors the JS self-test.
+          python3 conformance/tests/runner-self-test.py
       - name: Verify integration examples run
         run: |
           python3 integrations/python/example.py > /dev/null
