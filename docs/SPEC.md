@@ -273,7 +273,7 @@ when it:
 
 ## 17. Conformance
 
-`SigRank Conformant` is reserved for a later machine-executable conformance suite and MUST NOT be used as a v0.1-draft certification claim.
+`SigRank Conformant` is reserved until a third-party implementation passes the executable conformance suite independently. The suite exists in this repository (`conformance/runner.mjs`) and exercises schema validity, primitive semantics, alias translation, the canonical reference vector, zero/missing-cache cases, null and warning semantics, metric rounding, version declaration, content independence, extension exclusion, and provenance. It MUST NOT be used as a v0.1-draft certification claim until independently validated.
 
 ## 18. Reference implementation
 

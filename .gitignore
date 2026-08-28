@@ -3,3 +3,7 @@ python/dist/
 python/*.egg-info/
 python/build/
 python/sigrank_standard/__pycache__/
+__pycache__/
+*.pyc
+node_modules/
+.tmp-self-test/

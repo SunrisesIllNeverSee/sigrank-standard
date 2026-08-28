@@ -58,19 +58,22 @@ def compute_metrics(
     else:
         warnings.append("yield_undefined: requires input>0")
 
-    # 10xDEV = log10((o/i) × (cw/o) × (cr/cw)) = log10(cr/i)
-    dev10x = None
-    if cache_write is None or cache_read is None:
-        pass  # unavailable → null
-    elif input_tokens > 0 and output_tokens > 0 and cache_write > 0 and cache_read > 0:
-        dev10x = math.log10((output_tokens / input_tokens) * (cache_write / output_tokens) * (cache_read / cache_write))
-    else:
-        warnings.append("dev10x_undefined: requires all four pillars > 0")
-
+    # Standard-level warnings for unavailable cache (emitted before dev10x
+    # warning so the "why" precedes the "what" in the warning list)
     if cache_write is None:
         warnings.append("cache_write is unavailable; 10xDEV is undefined.")
     if cache_read is None:
         warnings.append("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.")
+
+    # 10xDEV = log10(R / I) = log10(Leverage) — requires all four pillars > 0
+    dev10x = None
+    if cache_write is None or cache_read is None:
+        pass  # unavailable → null
+        warnings.append("dev10x_undefined: requires all four pillars > 0")
+    elif input_tokens > 0 and output_tokens > 0 and cache_write > 0 and cache_read > 0:
+        dev10x = math.log10(cache_read / input_tokens)
+    else:
+        warnings.append("dev10x_undefined: requires all four pillars > 0")
 
     return {
         "metrics": {

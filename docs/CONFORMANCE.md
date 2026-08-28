@@ -1,4 +1,4 @@
-# Compatibility and Future Conformance
+# Compatibility and Conformance
 
 ## `SigRank Compatible — v0.1-draft`
 
@@ -14,21 +14,35 @@ A system may use this label when:
 
 `SigRank Conformant`
 
-is reserved until an official executable test suite exists.
+is reserved until a third-party implementation passes the executable conformance suite independently. The suite exists in this repository (`conformance/runner.mjs`) but has not yet been independently validated by a third party.
 
-## Future test suite
+## Executable conformance suite
 
-The conformance suite should test:
+The conformance suite (`conformance/runner.mjs`) is a self-contained, dependency-free runner that loads all fixtures from `examples/fixtures/`, builds a complete SigRank Standard record from each fixture input, and validates the record against the expected output and the JSON Schema.
 
-1. schema validity;
-2. primitive alias mapping;
-3. canonical reference vector;
-4. zero input;
-5. zero output;
-6. zero cache write;
-7. zero cache read;
-8. missing cache telemetry;
-9. metric rounding policy;
-10. version declaration;
-11. privacy/base-layer separation;
-12. field-dependent claim provenance.
+The suite tests:
+
+1. schema validity (record validated against `schema/sigrank-operator-record-v0.1.schema.json`);
+2. exact primitive semantics (non-negative integers, null for unavailable cache);
+3. alias translation (`cache_creation` normalized to `cache_write` in output);
+4. canonical reference vector (MO§ES Υ 18436.98);
+5. zero input;
+6. zero output;
+7. zero cache write;
+8. zero cache read;
+9. missing cache telemetry (null semantics + warnings);
+10. metric rounding policy;
+11. version declaration (`spec: sigrank/0.1-draft`);
+12. content independence (no prompt/response/code/files/credentials in telemetry or record);
+13. extension exclusion (no Construction, Build Archetypes, RS05, Scale V in base metrics);
+14. provenance (source object with non-empty provider, model, tool).
+
+Warning semantics are validated as ordered arrays — a conforming implementation MUST produce the same warnings in the same order for each fixture.
+
+Run the suite:
+
+```bash
+node conformance/runner.mjs
+```
+
+Exit code 0 = all fixtures pass. Exit code 1 = one or more failures.

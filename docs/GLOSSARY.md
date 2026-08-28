@@ -3,8 +3,8 @@
 ## AI Operator
 A human who directs, configures, supervises, iterates with, or otherwise operates a generative AI system.
 
-## AI Operator Performance
-Measured characteristics of how a human operates AI. It does not inherently mean productivity, correctness, intelligence, or business value.
+## AI Operator Token-Processing Efficiency
+Measured characteristics of how efficiently a human operator processes tokens when operating AI. It does not inherently mean productivity, correctness, intelligence, work quality, or business value.
 
 ## AI Operator Metric
 A quantitative measurement defined at the human-operator layer.
