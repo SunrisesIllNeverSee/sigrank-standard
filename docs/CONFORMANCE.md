@@ -35,7 +35,8 @@ The suite tests:
 11. version declaration (`spec: sigrank/0.1-draft`);
 12. content independence (no prompt/response/code/files/credentials in telemetry or record);
 13. extension exclusion (no Construction, Build Archetypes, RS05, Scale V in base metrics);
-14. provenance (source object with non-empty provider, model, tool).
+14. provenance (source object with non-empty provider, model, tool);
+15. enterprise adapter lineage (portable record remains conformant when outcome/lineage extensions are present — see [ENTERPRISE_ADAPTER.md](ENTERPRISE_ADAPTER.md)).
 
 Warning semantics are validated as ordered arrays — a conforming implementation MUST produce the same warnings in the same order for each fixture.
 

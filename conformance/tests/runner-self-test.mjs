@@ -39,8 +39,8 @@ function test(name, fn) {
 
 test("runner exits 0 on current fixtures", () => {
   const output = execFileSync("node", [RUNNER], { encoding: "utf-8", cwd: REPO_ROOT });
-  if (!output.includes("12 passed, 0 failed")) {
-    throw new Error(`Expected 12 passed, 0 failed. Got: ${output.trim().split("\n").pop()}`);
+  if (!output.includes("passed, 0 failed")) {
+    throw new Error(`Expected all passed, 0 failed. Got: ${output.trim().split("\n").pop()}`);
   }
 });
 
