@@ -8,6 +8,8 @@
 **Spec version string:** `otep/0.1-draft`
 **Maturity:** Experimental — see §3
 
+> **Note:** This `sigrank-standard` repository is the original candidate. The protocol was renamed to **TTEOP** (Token Telemetry Evaluation Operator Protocol) and the authoritative specification is now maintained in [`otep-spec/SPEC.md`](https://github.com/SunrisesIllNeverSee/otep-spec/blob/main/SPEC.md). The permanent scholarly citation for the v0.1.3-draft release is DOI [10.5281/zenodo.22179383](https://doi.org/10.5281/zenodo.22179383).
+
 ---
 
 ## Table of Contents

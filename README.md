@@ -4,6 +4,8 @@
 
 The SigRank Standard defines a common measurement vocabulary for observable token-processing patterns in human operation of generative AI systems. It measures how efficiently an operator processes tokens — not cognition, work quality, employee productivity, or business outcomes.
 
+> **Note:** This repository is the original `sigrank/0.1-draft` candidate. The protocol was renamed to **TTEOP** (Token Telemetry Evaluation Operator Protocol) and is now maintained in the [`otep-spec`](https://github.com/SunrisesIllNeverSee/otep-spec) repository. The permanent scholarly citation for the v0.1.3-draft release is DOI [10.5281/zenodo.22179383](https://doi.org/10.5281/zenodo.22179383) ([Zenodo record 22179383](https://zenodo.org/record/22179383)).
+
 ## Current version
 
 **`sigrank/0.1-draft`** — proposed open measurement specification.
