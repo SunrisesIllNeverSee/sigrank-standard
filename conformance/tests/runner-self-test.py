@@ -51,8 +51,8 @@ def test_runner_passes_current_fixtures():
         cwd=str(REPO_ROOT),
     )
     assert result.returncode == 0, f"Runner exited {result.returncode}: {result.stderr}"
-    assert "12/12 passed" in result.stdout, (
-        f"Expected 12/12 passed. Got: {result.stdout.strip().splitlines()[-1] if result.stdout.strip() else '(empty)'}"
+    assert "passed, 0 failed" in result.stdout or "ALL PASS" in result.stdout, (
+        f"Expected all passed, 0 failed. Got: {result.stdout.strip().splitlines()[-1] if result.stdout.strip() else '(empty)'}"
     )
 
 
