@@ -1,6 +1,7 @@
 # sigrank-standard (Python)
 
 Portable five-metric core for AI operator token-processing efficiency.
+Conforms to the OTEP v0.1-draft specification.
 
 ## Install
 
@@ -23,7 +24,7 @@ result = compute_metrics(
     cache_read=2_555_179_769,
 )
 print(result["metrics"])
-# {'yield': 18436.98, 'leverage': 2042.2, 'velocity': 9.028, 'snr': 0.9003, 'dev10x': 3.31}
+# {'yield': 18436.98, 'leverage': 2042.2, 'velocity': 9.028, 'output_fraction': 0.9003, 'log_leverage': 3.31}
 ```
 
 ### Build a full record
@@ -59,18 +60,20 @@ python -m sigrank_standard
 | Yield (Υ) | `(cache_read * output) / input^2` | Token cascade efficiency |
 | Leverage | `cache_read / input` | Context reuse |
 | Velocity | `output / input` | Output amplification |
-| SNR | `output / (input + output)` | Signal cleanliness |
-| 10xDEV | `log10(cache_read / input)` | Dev leverage |
+| output_fraction | `output / (input + output)` | Output share of total tokens |
+| log_leverage | `log10(cache_read / input)` | Log-scaled context reuse |
+
+Legacy aliases (deprecated): SNR → output_fraction, 10xDEV → log_leverage.
 
 ## Null semantics
 
 - When a denominator is zero, the metric is `None` (not 0 or Infinity)
-- When `cache_read` is `None`, Yield, Leverage, and 10xDEV are `None`
-- When `cache_write` is `None`, 10xDEV is `None`
+- When `cache_read` is `None`, Yield, Leverage, and log_leverage are `None`
+- When `cache_write` is `None`, log_leverage is `None`
 
 ## Spec
 
-SigRank Standard v0.1-draft. See [signalaf.com/standard](https://signalaf.com/standard).
+OTEP v0.1-draft (Operator Token Efficiency Protocol). See [signalaf.com/standard](https://signalaf.com/standard).
 
 ## License
 

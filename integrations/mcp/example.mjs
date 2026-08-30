@@ -1,8 +1,8 @@
 /**
  * integrations/mcp/example.mjs
  *
- * Minimal MCP server that exposes the SigRank Standard v0.1-draft
- * as a single tool: get_sigrank_standard_record.
+ * Minimal MCP server that exposes the OTEP v0.1-draft
+ * as a single tool: get_otep_record.
  *
  * This is a reference implementation showing how any MCP server can
  * implement the standard without depending on SignalAF code.
@@ -11,8 +11,8 @@
 import { computeMetrics } from "../typescript/example.ts";
 
 const TOOL_DEF = {
-  name: "get_sigrank_standard_record",
-  description: "Build a SigRank Standard v0.1-draft portable operator record from token telemetry. Computes Yield, Leverage, Velocity, SNR, and 10xDEV. No data is submitted or persisted.",
+  name: "get_otep_record",
+  description: "Build an OTEP v0.1-draft portable operator record from token telemetry. Computes Yield, Leverage, Velocity, output_fraction, and log_leverage. No data is submitted or persisted.",
   inputSchema: {
     type: "object",
     required: ["input", "output"],
@@ -35,11 +35,11 @@ process.stdin.on("data", (data) => {
         id: msg.id,
         result: { tools: [TOOL_DEF] },
       }) + "\n");
-    } else if (msg.method === "tools/call" && msg.params?.name === "get_sigrank_standard_record") {
+    } else if (msg.method === "tools/call" && msg.params?.name === "get_otep_record") {
       const args = msg.params.arguments;
       const { metrics, warnings } = computeMetrics(args);
       const record = {
-        spec: "sigrank/0.1-draft",
+        spec: "otep/0.1-draft",
         timestamp: new Date().toISOString(),
         source: { provider: args.provider || "unknown", model: args.model || "unknown", tool: args.tool || "unknown" },
         telemetry: {

@@ -1,7 +1,9 @@
 """
-Metric computation for SigRank Standard v0.1-draft.
+Metric computation for OTEP v0.1-draft (Operator Token Efficiency Protocol).
 
 Implements the five portable metrics from four token pillars (I/O/W/R).
+Conforms to the otep/0.1-draft specification. Metric names and warning text
+match the JS reference implementation (reference/otep.mjs) byte-for-byte.
 """
 
 import math
@@ -33,67 +35,76 @@ def compute_metrics(
 
     Returns:
         dict with 'metrics' and 'warnings' keys.
-        metrics: {yield, leverage, velocity, snr, dev10x} — each float or None.
+        metrics: {yield, leverage, velocity, output_fraction, log_leverage} — each float or None.
         warnings: list of str explaining any None values.
+
+    Warning ordering (SRP-METRIC-006): cache-unavailable warnings first,
+    then metric-undefined warnings.
     """
     warnings = []
+    cache_warnings = []
 
-    # SNR = output / (input + output)
-    snr_denom = input_tokens + output_tokens
-    snr = output_tokens / snr_denom if snr_denom > 0 else None
-    if snr is None:
-        warnings.append("snr_undefined: input+output=0")
+    # output_fraction = output / (input + output)
+    of_denom = input_tokens + output_tokens
+    of_raw = output_tokens / of_denom if of_denom > 0 else None
+    if of_raw is None:
+        warnings.append("output_fraction_undefined: input+output=0")
 
     # Velocity = output / input
-    velocity = output_tokens / input_tokens if input_tokens > 0 else None
-    if velocity is None:
+    velocity_raw = output_tokens / input_tokens if input_tokens > 0 else None
+    if velocity_raw is None:
         warnings.append("velocity_undefined: input=0")
 
-    # Leverage = cache_read / input
-    leverage = None
+    # Leverage = cache_read / input — None when cache_read is unavailable
+    leverage_raw = None
     if cache_read is None:
         pass  # unavailable → None
     elif input_tokens > 0:
-        leverage = cache_read / input_tokens
+        leverage_raw = cache_read / input_tokens
     else:
         warnings.append("leverage_undefined: input=0")
 
-    # Yield = (cache_read * output) / input^2 = leverage * velocity
-    y = None
+    # Yield = (cache_read × output) / input² = Leverage × Velocity
+    y_raw = None
     if cache_read is None:
         pass  # unavailable → None
-    elif leverage is not None and velocity is not None:
-        y = leverage * velocity
+    elif leverage_raw is not None and velocity_raw is not None:
+        y_raw = leverage_raw * velocity_raw
     else:
-        warnings.append("yield_undefined: requires input>0")
+        warnings.append("yield_undefined: requires input>0 and cache_read available")
 
-    # Standard-level warnings for unavailable cache (emitted before dev10x
-    # warning so the "why" precedes the "what" in the warning list)
+    # Cache-unavailable warnings (emitted before metric-specific undefined warnings
+    # per SRP-METRIC-006 ordering: cache-unavailable before metric-undefined)
     if cache_write is None:
-        warnings.append("cache_write is unavailable; 10xDEV is undefined.")
+        cache_warnings.append("cache_write is unavailable; log_leverage is undefined.")
     if cache_read is None:
-        warnings.append("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.")
+        cache_warnings.append("cache_read is unavailable; Yield, Leverage, and log_leverage are undefined.")
 
-    # 10xDEV = log10(R / I) = log10(Leverage) — requires all four pillars > 0
-    # (per SPEC §7.5 reference implementation policy)
-    dev10x = None
-    if cache_write is None or cache_read is None:
-        # unavailable → None
-        warnings.append("dev10x_undefined: requires all four pillars > 0")
-    elif input_tokens > 0 and output_tokens > 0 and cache_write > 0 and cache_read > 0:
-        dev10x = math.log10(cache_read / input_tokens)
+    # log_leverage = log10(cache_read / input)
+    # Reference implementation policy: requires all four pillars > 0
+    all_four_positive = (
+        input_tokens > 0 and output_tokens > 0 and
+        cache_write is not None and cache_write > 0 and
+        cache_read is not None and cache_read > 0
+    )
+    log_lev_raw = None
+    if not all_four_positive:
+        warnings.append("log_leverage_undefined: requires all four pillars > 0")
     else:
-        warnings.append("dev10x_undefined: requires all four pillars > 0")
+        log_lev_raw = math.log10(cache_read / input_tokens)
+
+    # Reorder warnings: cache-unavailable first, then metric-undefined (SRP-METRIC-006)
+    ordered_warnings = cache_warnings + warnings
 
     return {
         "metrics": {
-            "yield": _round(y, 2),
-            "leverage": _round(leverage, 1),
-            "velocity": _round(velocity, 3),
-            "snr": _round(snr, 4),
-            "dev10x": _round(dev10x, 2),
+            "yield": _round(y_raw, 2),
+            "leverage": _round(leverage_raw, 1),
+            "velocity": _round(velocity_raw, 3),
+            "output_fraction": _round(of_raw, 4),
+            "log_leverage": _round(log_lev_raw, 2),
         },
-        "warnings": warnings,
+        "warnings": ordered_warnings,
     }
 
 
@@ -105,16 +116,20 @@ def build_record(
     provider: str = "unknown",
     model: str = "unknown",
     tool: str = "unknown",
+    spec_version: str = "otep/0.1-draft",
 ) -> dict:
     """
-    Build a complete SigRank Standard v0.1-draft operator record.
+    Build a complete OTEP v0.1-draft operator record.
 
-    Returns a dict conforming to the sigrank-operator-record-v0.1 schema:
+    Returns a dict conforming to the telemetry-envelope-v0.1 schema:
         spec, timestamp, source, telemetry, metrics, warnings.
+
+    The spec_version parameter defaults to "otep/0.1-draft". Pass
+    "sigrank/0.1-draft" for legacy compatibility with the old runner.
     """
     result = compute_metrics(input_tokens, output_tokens, cache_write, cache_read)
     return {
-        "spec": "sigrank/0.1-draft",
+        "spec": spec_version,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "source": {"provider": provider, "model": model, "tool": tool},
         "telemetry": {

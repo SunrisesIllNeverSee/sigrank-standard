@@ -2,11 +2,11 @@
 """
 integrations/python/example.py
 
-Minimal Python implementation of the SigRank Standard v0.1-draft
+Minimal Python implementation of the OTEP v0.1-draft
 five-metric portable core. No dependencies.
 
 A conforming implementation MUST produce the same results as the
-conformance suite fixtures for the same inputs.
+conformance suite test vectors for the same inputs.
 """
 
 import math
@@ -28,12 +28,13 @@ def compute_metrics(
 ) -> dict:
     """Compute the five portable metrics from four token pillars."""
     warnings = []
+    cache_warnings = []
 
-    # SNR = output / (input + output)
-    snr_denom = input_tokens + output_tokens
-    snr = output_tokens / snr_denom if snr_denom > 0 else None
-    if snr is None:
-        warnings.append("snr_undefined: input+output=0")
+    # output_fraction = output / (input + output)
+    of_denom = input_tokens + output_tokens
+    of_raw = output_tokens / of_denom if of_denom > 0 else None
+    if of_raw is None:
+        warnings.append("output_fraction_undefined: input+output=0")
 
     # Velocity = output / input
     velocity = output_tokens / input_tokens if input_tokens > 0 else None
@@ -56,34 +57,39 @@ def compute_metrics(
     elif leverage is not None and velocity is not None:
         y = leverage * velocity
     else:
-        warnings.append("yield_undefined: requires input>0")
+        warnings.append("yield_undefined: requires input>0 and cache_read available")
 
-    # Standard-level warnings for unavailable cache (emitted before dev10x
-    # warning so the "why" precedes the "what" in the warning list)
+    # Cache-unavailable warnings (emitted before metric-specific undefined warnings
+    # per SRP-METRIC-006 ordering: cache-unavailable before metric-undefined)
     if cache_write is None:
-        warnings.append("cache_write is unavailable; 10xDEV is undefined.")
+        cache_warnings.append("cache_write is unavailable; log_leverage is undefined.")
     if cache_read is None:
-        warnings.append("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.")
+        cache_warnings.append("cache_read is unavailable; Yield, Leverage, and log_leverage are undefined.")
 
-    # 10xDEV = log10(R / I) = log10(Leverage) — requires all four pillars > 0
-    dev10x = None
-    if cache_write is None or cache_read is None:
-        # unavailable → null
-        warnings.append("dev10x_undefined: requires all four pillars > 0")
-    elif input_tokens > 0 and output_tokens > 0 and cache_write > 0 and cache_read > 0:
-        dev10x = math.log10(cache_read / input_tokens)
+    # log_leverage = log10(R / I) — requires all four pillars > 0
+    all_four_positive = (
+        input_tokens > 0 and output_tokens > 0 and
+        cache_write is not None and cache_write > 0 and
+        cache_read is not None and cache_read > 0
+    )
+    log_lev = None
+    if not all_four_positive:
+        warnings.append("log_leverage_undefined: requires all four pillars > 0")
     else:
-        warnings.append("dev10x_undefined: requires all four pillars > 0")
+        log_lev = math.log10(cache_read / input_tokens)
+
+    # Reorder: cache-unavailable first, then metric-undefined (SRP-METRIC-006)
+    ordered_warnings = cache_warnings + warnings
 
     return {
         "metrics": {
             "yield": _round(y, 2),
             "leverage": _round(leverage, 1),
             "velocity": _round(velocity, 3),
-            "snr": _round(snr, 4),
-            "dev10x": _round(dev10x, 2),
+            "output_fraction": _round(of_raw, 4),
+            "log_leverage": _round(log_lev, 2),
         },
-        "warnings": warnings,
+        "warnings": ordered_warnings,
     }
 
 
@@ -96,10 +102,10 @@ def build_record(
     model: str = "unknown",
     tool: str = "unknown",
 ) -> dict:
-    """Build a complete SigRank Standard v0.1-draft record."""
+    """Build a complete OTEP v0.1-draft record."""
     result = compute_metrics(input_tokens, output_tokens, cache_write, cache_read)
     return {
-        "spec": "sigrank/0.1-draft",
+        "spec": "otep/0.1-draft",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "source": {"provider": provider, "model": model, "tool": tool},
         "telemetry": {
@@ -114,7 +120,7 @@ def build_record(
 
 
 if __name__ == "__main__":
-    # Canonical reference: MO§ES seed values
+    # Canonical reference: MOSES seed values
     record = build_record(
         input_tokens=1251211,
         output_tokens=11296121,

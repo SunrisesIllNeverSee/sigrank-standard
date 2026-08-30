@@ -2,7 +2,7 @@
 /**
  * integrations/cli/example.mjs
  *
- * Minimal CLI that computes a SigRank Standard v0.1-draft record from
+ * Minimal CLI that computes an OTEP v0.1-draft record from
  * command-line arguments. No dependencies.
  *
  * Usage:
@@ -31,7 +31,7 @@ if (input === undefined || output === undefined) {
 
 const { metrics, warnings } = computeMetrics({ input, output, cache_write: cacheWrite, cache_read: cacheRead });
 const record = {
-  spec: "sigrank/0.1-draft",
+  spec: "otep/0.1-draft",
   timestamp: new Date().toISOString(),
   source: { provider: "cli", model: "cli", tool: "sigrank-standard-cli" },
   telemetry: { input, output, cache_write: cacheWrite, cache_read: cacheRead },

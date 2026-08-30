@@ -1,11 +1,11 @@
 /**
  * integrations/typescript/example.ts
  *
- * Minimal TypeScript implementation of the SigRank Standard v0.1-draft
+ * Minimal TypeScript implementation of the OTEP v0.1-draft
  * five-metric portable core. No dependencies.
  *
  * A conforming implementation MUST produce the same results as the
- * conformance suite fixtures for the same inputs.
+ * conformance suite test vectors for the same inputs.
  */
 
 export interface Telemetry {
@@ -19,12 +19,12 @@ export interface Metrics {
   yield: number | null;
   leverage: number | null;
   velocity: number | null;
-  snr: number | null;
-  dev10x: number | null;
+  output_fraction: number | null;
+  log_leverage: number | null;
 }
 
-export interface StandardRecord {
-  spec: "sigrank/0.1-draft";
+export interface OtepRecord {
+  spec: "otep/0.1-draft";
   timestamp: string;
   source: {
     provider: string;
@@ -52,9 +52,11 @@ export function computeMetrics(t: Telemetry): { metrics: Metrics; warnings: stri
   const cacheWrite = t.cache_write ?? null;
   const cacheRead = t.cache_read ?? null;
   const warnings: string[] = [];
+  const cacheWarnings: string[] = [];
 
-  const snr = input + output > 0 ? output / (input + output) : null;
-  if (snr === null) warnings.push("snr_undefined: input+output=0");
+  const ofDenom = input + output;
+  const ofRaw = ofDenom > 0 ? output / ofDenom : null;
+  if (ofRaw === null) warnings.push("output_fraction_undefined: input+output=0");
 
   const velocity = input > 0 ? output / input : null;
   if (velocity === null) warnings.push("velocity_undefined: input=0");
@@ -74,40 +76,44 @@ export function computeMetrics(t: Telemetry): { metrics: Metrics; warnings: stri
   } else if (leverage !== null && velocity !== null) {
     y = leverage * velocity;
   } else {
-    warnings.push("yield_undefined: requires input>0");
+    warnings.push("yield_undefined: requires input>0 and cache_read available");
   }
 
-  // Standard-level warnings for unavailable cache (emitted before dev10x
-  // warning so the "why" precedes the "what" in the warning list)
-  if (cacheWrite === null) warnings.push("cache_write is unavailable; 10xDEV is undefined.");
-  if (cacheRead === null) warnings.push("cache_read is unavailable; Yield, Leverage, and 10xDEV are undefined.");
+  // Cache-unavailable warnings (emitted before metric-specific undefined warnings
+  // per SRP-METRIC-006 ordering: cache-unavailable before metric-undefined)
+  if (cacheWrite === null) cacheWarnings.push("cache_write is unavailable; log_leverage is undefined.");
+  if (cacheRead === null) cacheWarnings.push("cache_read is unavailable; Yield, Leverage, and log_leverage are undefined.");
 
-  let dev10x: number | null = null;
-  if (cacheWrite === null || cacheRead === null) {
-    // unavailable → null
-    warnings.push("dev10x_undefined: requires all four pillars > 0");
-  } else if (input > 0 && output > 0 && cacheWrite > 0 && cacheRead > 0) {
-    dev10x = Math.log10(cacheRead / input);
+  // log_leverage = log10(cache_read / input) — requires all four pillars > 0
+  const allFourPositive =
+    input > 0 && output > 0 && cacheWrite !== null && cacheWrite > 0 &&
+    cacheRead !== null && cacheRead > 0;
+  let logLev: number | null = null;
+  if (!allFourPositive) {
+    warnings.push("log_leverage_undefined: requires all four pillars > 0");
   } else {
-    warnings.push("dev10x_undefined: requires all four pillars > 0");
+    logLev = Math.log10(cacheRead / input);
   }
+
+  // Reorder: cache-unavailable first, then metric-undefined (SRP-METRIC-006)
+  const orderedWarnings = [...cacheWarnings, ...warnings];
 
   return {
     metrics: {
       yield: round(y, 2),
       leverage: round(leverage, 1),
       velocity: round(velocity, 3),
-      snr: round(snr, 4),
-      dev10x: round(dev10x, 2),
+      output_fraction: round(ofRaw, 4),
+      log_leverage: round(logLev, 2),
     },
-    warnings,
+    warnings: orderedWarnings,
   };
 }
 
-export function buildRecord(t: Telemetry, source: { provider: string; model: string; tool: string }): StandardRecord {
+export function buildRecord(t: Telemetry, source: { provider: string; model: string; tool: string }): OtepRecord {
   const { metrics, warnings } = computeMetrics(t);
   return {
-    spec: "sigrank/0.1-draft",
+    spec: "otep/0.1-draft",
     timestamp: new Date().toISOString(),
     source,
     telemetry: {

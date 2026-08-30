@@ -1,4 +1,9 @@
-# SigRank Standard v0.1-draft
+# SigRank Standard v0.1-draft (SUPERSEDED)
+
+> **⚠️ SUPERSEDED:** This document is the original `sigrank/0.1-draft` specification.
+> It has been superseded by the OTEP (Operator Token Efficiency Protocol) specification
+> at [`../SPEC.md`](../SPEC.md). Use the root-level `SPEC.md` as the authoritative
+> specification. This file is retained for historical reference only.
 
 ## 1. Status
 
