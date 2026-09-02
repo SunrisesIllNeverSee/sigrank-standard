@@ -1,6 +1,8 @@
 # SigRank Standard
 
-**Open measurement specification for AI operator token-processing efficiency.**
+**LEGACY PREDECESSOR of TTEOP — superseded. Retained for migration evidence and backward compatibility.**
+
+The SigRank Standard was the original `sigrank/0.1-draft` open measurement specification for AI operator token-processing efficiency. It has been superseded by **TTEOP** (Token Telemetry Evaluation Operator Protocol), now maintained in the [`otep-spec`](https://github.com/SunrisesIllNeverSee/otep-spec) repository. The legacy version alias `sigrank/0.1-draft` is accepted by TTEOP for backward compatibility and resolves to current TTEOP semantics.
 
 The SigRank Standard defines a common measurement vocabulary for observable token-processing patterns in human operation of generative AI systems. It measures how efficiently an operator processes tokens — not cognition, work quality, employee productivity, or business outcomes.
 
@@ -8,7 +10,7 @@ The SigRank Standard defines a common measurement vocabulary for observable toke
 
 ## Current version
 
-**`sigrank/0.1-draft`** — proposed open measurement specification.
+**`sigrank/0.1-draft`** — legacy version alias. Superseded by `tteop/0.1-draft` (TTEOP). Accepted for backward compatibility; resolves to current TTEOP semantics.
 
 ## Portable core
 
@@ -89,14 +91,19 @@ See `LICENSE` and `NOTICE` for details.
 
 ## Governance status
 
-This repository is a **candidate authority**, not a designated authority. It was created under a now-superseded handoff and is awaiting owner designation per the Course of Ship Gate C process.
+**STATUS: LEGACY PREDECESSOR — SUPERSEDED**
 
-- Technical verification: 12/12 conformance fixtures pass, Python reference reproduces canonical Yield 18436.98
-- Alignment: wording narrowed to token-processing/efficiency construct per Course of Ship invariants
-- Process: initial implementation was pushed directly to `main`; this alignment change is a reviewable PR
-- Designation: pending owner approval at Gate C
+This repository is the original `sigrank/0.1-draft` measurement specification. It has been superseded by **TTEOP** (Token Telemetry Evaluation Operator Protocol), maintained in the [`otep-spec`](https://github.com/SunrisesIllNeverSee/otep-spec) repository.
 
-No merge, publication, or deployment is authorized by this candidate's existence.
+Per the owner-directed authority architecture baseline (2026-09-02):
+
+- **TTEOP is the sole interoperability protocol authority** for the token telemetry / AI operator measurement layer.
+- **sigrank-standard is a legacy predecessor**, not a second active standard and not a candidate authority.
+- The legacy version alias `sigrank/0.1-draft` is accepted by TTEOP for backward compatibility and resolves to current TTEOP semantics.
+- This repository is retained for **migration evidence, historical provenance, and backward compatibility only**.
+- Do not use this repository as the primary conformance authority for new product CI. Products should pin a TTEOP release instead.
+
+The prior "candidate authority pending Gate C" status is superseded. No merge, publication, or deployment is authorized by this repository's existence.
 
 ## Related
 
