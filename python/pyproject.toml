@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sigrank-standard"
 version = "0.1.0"
-description = "SigRank Standard v0.1-draft — portable five-metric core for AI operator token-processing efficiency. No dependencies."
+description = "LEGACY PREDECESSOR of TTEOP. The canonical protocol is TTEOP (Token Telemetry Evaluation Operator Protocol), published as tteop-spec on npm and maintained at github.com/SunrisesIllNeverSee/otep-spec. This package is retained for backward compatibility. Conforms to the tteop/0.1-draft specification."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.9"

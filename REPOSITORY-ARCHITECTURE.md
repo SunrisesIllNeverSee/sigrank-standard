@@ -131,7 +131,7 @@ otep-spec/
 
 | Path | Authority | Description |
 |------|-----------|-------------|
-| `SPEC.md` | **Normative** | The authoritative specification. All other documents defer to it. Contains all MUST/SHOULD/MAY requirements with stable IDs. |
+| `SPEC.md` | **Legacy normative** | Legacy specification. Defers to TTEOP (`otep-spec/SPEC.md`) as the authoritative protocol specification. Retained for migration evidence and backward compatibility. |
 | `TERMINOLOGY.md` | **Normative** | Canonical definitions of all terms used in SPEC.md. Terms defined here are binding. |
 | `PRIVACY.md` | **Normative** | Privacy mode definitions and content-independence requirements. Binding on all implementations. |
 | `SECURITY.md` | **Normative** | Security considerations, threat model, and reporting process. |
@@ -167,7 +167,7 @@ otep-spec/
 
 ## Design Principles
 
-1. **Single source of truth:** `SPEC.md` is authoritative. All other documents defer to it.
+1. **Single source of truth:** TTEOP (`otep-spec/SPEC.md`) is authoritative. This repository's `SPEC.md` is a legacy predecessor that defers to TTEOP. All other documents in this repository defer to TTEOP.
 2. **Machine-readable where possible:** Schemas, registry, test vectors, and adapter definitions are JSON.
 3. **Separation of concerns:** Normative requirements are in root files and `schemas/`, `metrics/`, `conformance/`, `test-vectors/`. Informative context is in `docs/`, `reference/`, `reports/`.
 4. **Extensibility:** `oeps/` provides a formal extension process. `adapters/` provides provider extensibility. `profiles/` provides application extensibility.

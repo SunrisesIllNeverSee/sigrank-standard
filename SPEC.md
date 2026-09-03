@@ -205,9 +205,9 @@ See `TERMINOLOGY.md` for the complete canonical glossary. Key terms used in this
 
 **Failure condition:** The adapter maps a provider field to the wrong OTEP primitive (e.g., mapping cached tokens to `input` instead of `cache_read`).
 
-**`SRP-ARCH-004`** This specification is authoritative. No proprietary application, platform, or implementation is authoritative over the specification. Where a proprietary implementation and this specification disagree, the specification prevails.
+**`SRP-ARCH-004`** This specification is a legacy predecessor. The authoritative protocol specification is TTEOP (Token Telemetry Evaluation Operator Protocol), maintained in [`otep-spec/SPEC.md`](https://github.com/SunrisesIllNeverSee/otep-spec/blob/main/SPEC.md). This repository is retained for migration evidence and backward compatibility. Where this specification and TTEOP disagree, TTEOP prevails.
 
-**Failure condition:** A proprietary implementation's behavior is treated as authoritative over the specification, or the specification is silently modified to match a proprietary implementation without going through the OEP process.
+**Failure condition:** This legacy specification is treated as authoritative over TTEOP, or TTEOP semantics are silently modified to match this legacy specification without going through the TTEOP governance process.
 
 ---
 
@@ -1177,7 +1177,7 @@ Standard warning strings:
 | SRP-ARCH-001 | §6 | Producer emits schema-valid envelope |
 | SRP-ARCH-002 | §6 | Consumer computes metrics identically regardless of producer |
 | SRP-ARCH-003 | §6 | Adapter maps fields without altering semantics |
-| SRP-ARCH-004 | §6 | Specification is authoritative over proprietary applications |
+| SRP-ARCH-004 | §6 | Legacy specification defers to TTEOP as authoritative |
 | SRP-DATA-001 | §7.2 | protocol_version present and valid |
 | SRP-DATA-002 | §7.2 | telemetry.input required non-negative integer |
 | SRP-DATA-003 | §7.2 | telemetry.output required non-negative integer |
