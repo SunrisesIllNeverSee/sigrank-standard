@@ -10,10 +10,12 @@ jobs:
   conformance:
     name: Run conformance suite
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          persist-credentials: false
           node-version: 22
       - name: Run conformance suite
         run: node conformance/runner.mjs
